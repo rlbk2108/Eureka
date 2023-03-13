@@ -1,11 +1,13 @@
 from django.contrib import admin
-from .models import CustomUser
+from .models import CustomUser, Course
+
+admin.site.register(Course)
 
 
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'last_name', 'first_name')
-    list_filter = ('is_active', 'is_staff', 'is_superuser')
+    list_display = ('username', 'first_name', 'email')
+    list_filter = ('is_active', 'is_staff', 'is_superuser', 'first_name')
 
     fieldsets = (
         (None, {

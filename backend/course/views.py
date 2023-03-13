@@ -1,11 +1,17 @@
 from rest_framework import viewsets
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from .serializers import CourseSerializer
-from .models import Course
+from .serializers import CourseSerializer, UserSerializer
+from .models import Course, CustomUser
 
 
 class CourseListView(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class UsersListView(viewsets.ModelViewSet):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
     permission_classes = [AllowAny]
