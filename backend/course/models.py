@@ -10,10 +10,12 @@ class Course(models.Model):
     title = models.CharField(max_length=50)
     description = models.CharField(max_length=50)
     content = models.TextField()
-    price = models.TextField()
-    author = models.TextField()
+    price = models.PositiveIntegerField()
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, related_name='courses')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = settings.AUTH_USER_MODEL
 
     def __str__(self):
         return self.title
@@ -32,6 +34,10 @@ class CustomUser(AbstractUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+
+    @property
+    def get_id(self):
+        return self.pk
 
     @property
     def token(self):
@@ -66,3 +72,4 @@ class CustomUser(AbstractUser, PermissionsMixin):
         }, settings.SECRET_KEY, algorithm='HS256')
 
         return token
+
