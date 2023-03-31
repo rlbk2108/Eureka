@@ -31,4 +31,15 @@ class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         depth = 1
-        fields = ['id', 'title', 'description', 'content', 'price', 'author']
+        fields = ['id', 'title', 'description', 'content', 'price', 'author', 'discount']
+
+        
+    def create(self, validated_data):
+        if int(validated_data['price']) > 50:
+            validated_data['discount'] = str(float(validated_data['price']) / 30)
+        else:
+            validated_data['discount'] = 0
+
+        course = Course.objects.create(**validated_data)
+
+        return course
