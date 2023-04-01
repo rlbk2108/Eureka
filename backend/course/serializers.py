@@ -50,7 +50,7 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Course
         depth = 2
-        fields = ['url', 'id', 'title', 'description', 'lessons', 'price', 'author']
+        fields = ['url', 'id', 'title', 'description', 'lessons', 'price', 'author', 'discount']
 
     def build_nested_field(self, field_name, relation_info, nested_depth):
         class NestedSerializer(serializers.ModelSerializer):
@@ -63,3 +63,14 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
         field_kwargs = get_nested_relation_kwargs(relation_info)
 
         return field_class, field_kwargs
+
+
+    def create(self, validated_data):
+        if int(validated_data['price']) > 50:
+            validated_data['discount'] = str(float(validated_data['price']) / 30)
+        else:
+            validated_data['discount'] = 0
+
+        course = Course.objects.create(**validated_data)
+
+        return course

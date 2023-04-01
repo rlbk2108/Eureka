@@ -21,11 +21,12 @@ class LessonBlock(models.Model):
 class Course(models.Model):
     title = models.CharField(max_length=100)
     description = models.CharField(max_length=500)
+    video = models.FileField(upload_to='videos/', null=True, blank=True)
     price = models.PositiveIntegerField()
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, related_name='courses')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    discount = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     objects = settings.AUTH_USER_MODEL
 
     def __str__(self):
