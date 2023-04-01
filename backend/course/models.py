@@ -3,13 +3,24 @@ import jwt
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.db import models
+
 from .managers import CustomUserManager
 
 
+class Images(models.Model):
+    img_description = models.CharField(max_length=150, default='Image description', null=True)
+    image = models.ImageField(upload_to='pics')
+
+
+class LessonBlock(models.Model):
+    block_title = models.CharField(max_length=100)
+    block_text = models.CharField(max_length=500)
+    block_image = models.ForeignKey(Images, on_delete=models.CASCADE, blank=True, null=True)
+
+
 class Course(models.Model):
-    title = models.CharField(max_length=50)
-    description = models.CharField(max_length=50)
-    content = models.TextField()
+    title = models.CharField(max_length=100)
+    description = models.CharField(max_length=500)
     price = models.PositiveIntegerField()
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, related_name='courses')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -19,6 +30,14 @@ class Course(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Lesson(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, blank=True, null=True, related_name='lessons')
+    lesson_title = models.CharField(max_length=100)
+    lesson_description = models.CharField(max_length=500)
+    lesson_blocks = models.ManyToManyField(LessonBlock, related_name='lesson_blocks', blank=True,
+                                           choices=LessonBlock.objects.all().values_list('id', 'block_title'))
 
 
 class CustomUser(AbstractUser, PermissionsMixin):

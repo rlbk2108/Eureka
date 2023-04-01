@@ -1,10 +1,9 @@
 from rest_framework import serializers
-from .models import Course, CustomUser
+from .models import Course, CustomUser, Lesson, LessonBlock
 from rest_framework.utils.field_mapping import get_nested_relation_kwargs
 
 
 class UserSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = CustomUser
         depth = 1
@@ -25,10 +24,42 @@ class UserSerializer(serializers.ModelSerializer):
         return field_class, field_kwargs
 
 
-class CourseSerializer(serializers.ModelSerializer):
+class LessonBlockSerializer(serializers.HyperlinkedModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name='block-detail')
+
+    class Meta:
+        model = LessonBlock
+        fields = ['url', 'id', 'block_title', 'block_text', 'block_image']
+
+
+class LessonSerializer(serializers.HyperlinkedModelSerializer):
+    lesson_blocks = LessonBlockSerializer(required=True, many=True)
+
+    # queryset = LessonBlock.objects.all()
+    # lesson_blocks = LessonBlockSerializer()
+
+    class Meta:
+        model = Lesson
+        depth = 1
+        fields = ['url', 'lesson_title', 'lesson_description', 'lesson_blocks']
+
+
+class CourseSerializer(serializers.HyperlinkedModelSerializer):
     author = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
 
     class Meta:
         model = Course
-        depth = 1
-        fields = ['id', 'title', 'description', 'content', 'price', 'author']
+        depth = 2
+        fields = ['url', 'id', 'title', 'description', 'lessons', 'price', 'author']
+
+    def build_nested_field(self, field_name, relation_info, nested_depth):
+        class NestedSerializer(serializers.ModelSerializer):
+            class Meta:
+                model = relation_info.related_model
+                depth = nested_depth - 1
+                exclude = ['course']
+
+        field_class = NestedSerializer
+        field_kwargs = get_nested_relation_kwargs(relation_info)
+
+        return field_class, field_kwargs
