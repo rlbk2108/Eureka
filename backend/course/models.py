@@ -88,8 +88,7 @@ class CustomUser(AbstractUser, PermissionsMixin):
 
         token = jwt.encode({
             'id': self.pk,
-            'exp': int(dt.strftime('%S'))
+            'exp': int(dt.strftime('%S')),
         }, settings.SECRET_KEY, algorithm='HS256')
 
         return token
-

@@ -1,21 +1,15 @@
+import select
 from django.contrib import admin
-from .models import CustomUser, Course, Lesson, LessonBlock
+from .models import CustomUser, Course, Lesson, LessonBlock, Images
 
 
 admin.site.register(LessonBlock)
+admin.site.register(Images)
 
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
     pass
-    #list_select_related = ('lesson_blocks', )
-    radio_fields = {'lesson_blocks': admin.VERTICAL}
-
-    # def formfield_for_foreignkey(self, db_field, request, **kwargs):
-    #     if db_field.name == "lessons":
-    #         parent_id = request.resolver_match.kwargs['object_id']
-    #         kwargs["queryset"] = LessonBlock.objects.all()
-    #     return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 @admin.register(Course)
