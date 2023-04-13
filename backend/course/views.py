@@ -33,6 +33,15 @@ class CourseListView(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=False, methods=['GET'])
+    def search(self, request):
+        search_term = request.query_params.get('q')
+        if not search_term:
+            return Response([])
+        queryset = self.queryset.filter(title__icontains=search_term)
+        serializer = self.serializer_class(queryset=queryset, many=True)
+        return Response(serializer.data)
+
 
 class ProfileView(viewsets.ModelViewSet):
     queryset = Profile.objects.all()

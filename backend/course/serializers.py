@@ -124,7 +124,7 @@ class LessonSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['url', 'course', 'lesson_title', 'lesson_description', 'lesson_blocks']
 
 
-class CourseSerializer(serializers.PrimaryKeyRelatedField, serializers.HyperlinkedModelSerializer):
+class CourseSerializer(serializers.HyperlinkedModelSerializer):
     lessons = LessonSerializer(many=True, read_only=True)
 
     class Meta:
@@ -155,7 +155,7 @@ class CourseSerializer(serializers.PrimaryKeyRelatedField, serializers.Hyperlink
 
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
-    taken_courses = CourseSerializer(many=True, queryset=Course.objects.all())
+    taken_courses = serializers.PrimaryKeyRelatedField(many=True, queryset=Course.objects.all())
     print(taken_courses)
 
     class Meta:
