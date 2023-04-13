@@ -9,19 +9,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .serializers import CourseSerializer, UserSerializer, \
-    LessonSerializer, LessonBlockSerializer, ImagesSerializer, RegistrationSerializer, LoginSerializer
-from .models import Course, CustomUser, Lesson, LessonBlock, Images
+    LessonSerializer, LessonBlockSerializer, ImagesSerializer, RegistrationSerializer, LoginSerializer, ProfileSerializer
+from .models import Course, CustomUser, Lesson, LessonBlock, Images, Profile
 from .renderers import UserJSONRenderer
 from django.conf import settings
 
 
-class CourseListView(mixins.CreateModelMixin,
-                     mixins.ListModelMixin,
-                     mixins.RetrieveModelMixin,
-                     viewsets.GenericViewSet):
+class CourseListView(viewsets.ModelViewSet):
     queryset = Course.objects.select_related('author', 'author')
     serializer_class = CourseSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
         # инизиализируем сериализатор, используя serializer_class
@@ -33,6 +30,21 @@ class CourseListView(mixins.CreateModelMixin,
             # сохраняем сериализатор с указанием автора
             # тот самый проблемный момент
             serializer.save(author=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProfileView(viewsets.ModelViewSet):
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        courses = Course.objects.filter(author_id=request.data['user'])
+        print(courses)
+        if serializer.is_valid():
+            serializer.save(created_courses=courses)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

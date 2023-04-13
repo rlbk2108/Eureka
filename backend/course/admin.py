@@ -1,10 +1,11 @@
 import select
 from django.contrib import admin
-from .models import CustomUser, Course, Lesson, LessonBlock, Images
+from .models import CustomUser, Course, Lesson, LessonBlock, Images, Profile
 
 
 admin.site.register(LessonBlock)
 admin.site.register(Images)
+admin.site.register(Profile)
 
 
 @admin.register(Lesson)

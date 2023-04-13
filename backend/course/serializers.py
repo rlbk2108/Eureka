@@ -4,15 +4,16 @@ from rest_framework import serializers
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
-from .models import Course, CustomUser, Lesson, LessonBlock, Images
+from .models import Course, CustomUser, Lesson, LessonBlock, Images, Profile
 from rest_framework.utils.field_mapping import get_nested_relation_kwargs
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+
     class Meta:
         model = CustomUser
         depth = 1
-        fields = ['username', 'first_name', 'last_name', 'email', 'password', 'courses']
+        fields = ['url', 'username', 'first_name', 'last_name', 'email', 'password', 'courses']
         extra_kwargs = {'password': {'write_only': True},
                         'courses': {'read_only': True}
                         }
@@ -112,10 +113,10 @@ class LoginSerializer(serializers.Serializer):
 
 
 class LessonSerializer(serializers.HyperlinkedModelSerializer):
-    lesson_blocks = serializers.HyperlinkedRelatedField(queryset=LessonBlock.objects.all(),
-                                                        many=True,
-                                                        view_name='block-detail')
     course = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all())
+    queryset = [(LessonBlock.objects.get(pk=lb.id), lb.block_title) for lb in LessonBlock.objects.all()]
+    lesson_blocks = serializers.HyperlinkedRelatedField(many=True, queryset=LessonBlock.objects.all(),
+                                                        view_name='block-detail')
 
     class Meta:
         model = Lesson
@@ -123,8 +124,8 @@ class LessonSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['url', 'course', 'lesson_title', 'lesson_description', 'lesson_blocks']
 
 
-class CourseSerializer(serializers.HyperlinkedModelSerializer):
-    author = UserSerializer(read_only=True)
+class CourseSerializer(serializers.PrimaryKeyRelatedField, serializers.HyperlinkedModelSerializer):
+    lessons = LessonSerializer(many=True, read_only=True)
 
     class Meta:
         model = Course
@@ -136,7 +137,7 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
             class Meta:
                 model = relation_info.related_model
                 depth = nested_depth - 1
-                exclude = ['course']
+                fields = ['username', 'url']
 
         field_class = NestedSerializer
         field_kwargs = get_nested_relation_kwargs(relation_info)
@@ -150,6 +151,30 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
             validated_data['discount'] = 0
 
         return Course.objects.create(**validated_data)
+
+
+class ProfileSerializer(serializers.HyperlinkedModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+    taken_courses = CourseSerializer(many=True, queryset=Course.objects.all())
+    print(taken_courses)
+
+    class Meta:
+        model = Profile
+        depth = 1
+        fields = ['url', 'user', 'taken_courses', 'created_courses']
+        extra_kwargs = {'taken_courses': {'read_only': False}}
+
+    def build_nested_field(self, field_name, relation_info, nested_depth):
+        class NestedSerializer(serializers.ModelSerializer):
+            class Meta:
+                model = relation_info.related_model
+                depth = nested_depth - 1
+                exclude = ['author']
+
+        field_class = NestedSerializer
+        field_kwargs = get_nested_relation_kwargs(relation_info)
+
+        return field_class, field_kwargs
 
 
 class ImagesSerializer(serializers.ModelSerializer):

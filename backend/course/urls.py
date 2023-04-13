@@ -6,7 +6,8 @@ from .views import RegistrationAPIView, LoginAPIView
 router = DefaultRouter()
 
 router.register(r'courses', views.CourseListView, basename='course')
-router.register(r'users', views.UsersListView, basename='user')
+router.register(r'profiles', views.ProfileView, basename='profile')
+router.register(r'users', views.UsersListView, basename='customuser')
 router.register(r'lessons', views.LessonListView, basename='lesson')
 router.register(r'lesson_blocks', views.LessonBlocksListView, basename='block')
 router.register(r'images', views.ImagesView, basename='image')

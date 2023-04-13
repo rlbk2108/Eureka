@@ -12,12 +12,6 @@ class Images(models.Model):
     image = models.ImageField(upload_to='pics')
 
 
-class LessonBlock(models.Model):
-    block_title = models.CharField(max_length=100)
-    block_text = models.CharField(max_length=500)
-    block_image = models.ForeignKey(Images, on_delete=models.CASCADE, blank=True, null=True)
-
-
 class Course(models.Model):
     title = models.CharField(max_length=100)
     description = models.CharField(max_length=500)
@@ -33,12 +27,25 @@ class Course(models.Model):
         return self.title
 
 
+class Profile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    taken_courses = models.ManyToManyField(Course, related_name='taken_by_me', blank=True)
+    created_courses = models.ManyToManyField(Course, related_name='my_created', blank=True,
+                                             )
+
+
 class Lesson(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, blank=True, null=True, related_name='lessons')
     lesson_title = models.CharField(max_length=100)
     lesson_description = models.CharField(max_length=500)
-    lesson_blocks = models.ManyToManyField(LessonBlock, related_name='lesson_blocks', blank=True,
-                                           choices=LessonBlock.objects.all().values_list('id', 'block_title'))
+
+
+class LessonBlock(models.Model):
+    block_title = models.CharField(max_length=100)
+    block_text = models.CharField(max_length=500)
+    block_image = models.ForeignKey(Images, on_delete=models.CASCADE, blank=True, null=True)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, null=True, related_name='lesson_blocks',
+                               blank=True)
 
 
 class CustomUser(AbstractUser, PermissionsMixin):
