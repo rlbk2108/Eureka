@@ -1,5 +1,16 @@
+import select
 from django.contrib import admin
-from .models import CustomUser, Course
+from .models import CustomUser, Course, Lesson, LessonBlock, Images, Profile
+
+
+admin.site.register(LessonBlock)
+admin.site.register(Images)
+admin.site.register(Profile)
+
+
+@admin.register(Lesson)
+class LessonAdmin(admin.ModelAdmin):
+    pass
 
 
 @admin.register(Course)
@@ -30,7 +41,6 @@ class CustomUserAdmin(admin.ModelAdmin):
             'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')
         }),
         ('Important dates', {
-           'fields': ('last_login', 'date_joined')
+            'fields': ('last_login', 'date_joined')
         }),
     )
-

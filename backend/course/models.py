@@ -3,13 +3,18 @@ import jwt
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.db import models
+
 from .managers import CustomUserManager
 
 
+class Images(models.Model):
+    img_description = models.CharField(max_length=150, default='Image description', null=True)
+    image = models.ImageField(upload_to='pics')
+
+
 class Course(models.Model):
-    title = models.CharField(max_length=50)
-    description = models.CharField(max_length=50)
-    content = models.TextField()
+    title = models.CharField(max_length=100)
+    description = models.CharField(max_length=500)
     video = models.FileField(upload_to='videos/', null=True, blank=True)
     price = models.PositiveIntegerField()
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, related_name='courses')
@@ -20,6 +25,27 @@ class Course(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    taken_courses = models.ManyToManyField(Course, related_name='taken_by_me', blank=True)
+    created_courses = models.ManyToManyField(Course, related_name='my_created', blank=True,
+                                             )
+
+
+class Lesson(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, blank=True, null=True, related_name='lessons')
+    lesson_title = models.CharField(max_length=100)
+    lesson_description = models.CharField(max_length=500)
+
+
+class LessonBlock(models.Model):
+    block_title = models.CharField(max_length=100)
+    block_text = models.CharField(max_length=500)
+    block_image = models.ForeignKey(Images, on_delete=models.CASCADE, blank=True, null=True)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, null=True, related_name='lesson_blocks',
+                               blank=True)
 
 
 class CustomUser(AbstractUser, PermissionsMixin):
@@ -69,8 +95,7 @@ class CustomUser(AbstractUser, PermissionsMixin):
 
         token = jwt.encode({
             'id': self.pk,
-            'exp': int(dt.strftime('%S'))
+            'exp': int(dt.strftime('%S')),
         }, settings.SECRET_KEY, algorithm='HS256')
 
         return token
-
