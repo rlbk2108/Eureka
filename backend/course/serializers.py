@@ -42,7 +42,8 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     # Клиентская сторона не должна иметь возможность отправлять токен вместе с
     # запросом на регистрацию. Сделаем его доступным только на чтение.
-    token = serializers.CharField(max_length=255, read_only=True)
+    token = serializers.CharField(max_length=1000, read_only=True)
+    # refresh_token = serializers.CharField(max_length=255, read_only=True)
 
     class Meta:
         model = CustomUser
@@ -114,7 +115,6 @@ class LoginSerializer(serializers.Serializer):
 
 class LessonSerializer(serializers.HyperlinkedModelSerializer):
     course = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all())
-    queryset = [(LessonBlock.objects.get(pk=lb.id), lb.block_title) for lb in LessonBlock.objects.all()]
     lesson_blocks = serializers.HyperlinkedRelatedField(many=True, queryset=LessonBlock.objects.all(),
                                                         view_name='block-detail')
 
@@ -156,7 +156,6 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
     taken_courses = serializers.PrimaryKeyRelatedField(many=True, queryset=Course.objects.all())
-    print(taken_courses)
 
     class Meta:
         model = Profile

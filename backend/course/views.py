@@ -40,6 +40,14 @@ class CourseListView(viewsets.ModelViewSet):
             return Response([])
         queryset = self.queryset.filter(title__icontains=search_term)
         serializer = self.serializer_class(queryset=queryset, many=True)
+        serializer.is_valid()
+        return Response(serializer.data)
+
+    @action(detail=True)
+    def take_course(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data, many=True)
+        serializer.is_valid()
+        print(serializer)
         return Response(serializer.data)
 
 
@@ -51,7 +59,6 @@ class ProfileView(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, context={'request': request})
         courses = Course.objects.filter(author_id=request.data['user'])
-        print(courses)
         if serializer.is_valid():
             serializer.save(created_courses=courses)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -99,7 +106,9 @@ class LoginAPIView(APIView):
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        response = Response(serializer.data, status=status.HTTP_200_OK)
+
+        return response
 
 
 class LessonListView(viewsets.ModelViewSet):

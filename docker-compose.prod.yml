@@ -1,0 +1,68 @@
+version: '3.10'
+
+services:
+  web:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+      args:
+        DJANGO_ALLOWED_HOSTS: 127.0.0.1
+        DJANGO_SECRET_KEY: 'django-insecure-@^t&x53&z156^5u!!4pz_-q1jad^b_1^++p*dj)z(8yiapbkkn'
+        DJANGO_CORS_ORIGIN_WHITELIST: http://127.0.0.1
+    command: gunicorn --chdir config config.wsgi:application --reload --bind 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - static_volume:/backend/static
+      - media_volume:/backend/media
+      - .:/code/backend
+    expose:
+      - 8000
+    env_file:
+      - backend/.env.dev
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        API_URL: "*"
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/eureka-app/:/frontend/eureka-app
+      - build_folder:/frontend/build
+      - ./frontend/eureka-app/node_modules/:/frontend/eureka-app/node_modules
+    tty: true
+
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=postgresdb
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
+
+  nginx:
+    build: ./nginxweb
+    ports:
+      - "80:3000"
+    volumes:
+      - static_volume:/backend/static
+      - media_volume:/backend/media
+      - build_folder:/var/www/frontend
+    depends_on:
+      - frontend
+      - web
+    restart: always
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+  build_folder:
