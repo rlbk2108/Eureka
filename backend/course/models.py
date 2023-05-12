@@ -16,6 +16,7 @@ class Images(models.Model):
 class Course(models.Model):
     title = models.CharField(max_length=100)
     description = models.CharField(max_length=500)
+    poster = models.ImageField(upload_to='pics', null=True)
     video = models.FileField(upload_to='videos/', null=True, blank=True)
     price = models.PositiveIntegerField()
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, related_name='courses')

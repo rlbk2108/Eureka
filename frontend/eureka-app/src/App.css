@@ -1,6 +1,6 @@
 
 .App {
-  background-color: white;
+  background-color: #0d1117;
 }
 
 .Auth-form-container {
@@ -45,4 +45,30 @@ label {
   font-size: 14px;
   font-weight: 600;
   color: #e6edf3;
+}
+
+.card {
+  width: 18rem;
+}
+
+.center {
+  margin: 0 auto 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.carousel-item {
+  transition: transform 0.5s ease;
+}
+
+.carousel-item.active {
+  transform: translateX(0%);
+}
+
+.carousel-item.prev {
+  transform: translateX(-100%);
+}
+
+.carousel-item.next {
+  transform: translateX(100%);
 }

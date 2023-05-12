@@ -5,12 +5,11 @@ class CustomUserManager(BaseUserManager):
     def create_user(self, **extra_fields):
 
         if not extra_fields['username']:
-            raise ValueError("The given username must be set")
+            raise ValueError("The username must be given")
         user = self.model(first_name=extra_fields['first_name'],
                           last_name=extra_fields['last_name'],
                           username=extra_fields['username'],
                           email=self.normalize_email(extra_fields['email']))
-        user.set_password(extra_fields['password'])
         user.save(using=self._db)
 
         return user

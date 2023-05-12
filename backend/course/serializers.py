@@ -130,7 +130,7 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Course
         depth = 2
-        fields = ['url', 'id', 'title', 'description', 'lessons', 'price', 'author', 'discount']
+        fields = ['url', 'id', 'title', 'description', 'poster', 'lessons', 'price', 'author', 'discount']
 
     def build_nested_field(self, field_name, relation_info, nested_depth):
         class NestedSerializer(serializers.ModelSerializer):

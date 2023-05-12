@@ -1,8 +1,14 @@
+import json
+
 import jwt
+from django.contrib.auth.forms import UserCreationForm
 from django.views.generic import ListView
 from rest_framework.response import Response
 from rest_framework import viewsets, status, mixins
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from .forms import CustomUserCreationForm
 from .permissions import IsOwnerOrReadOnly
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -70,6 +76,14 @@ class UsersListView(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
+    def create(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            form = CustomUserCreationForm(request.data)
+            if form.is_valid():
+                form.save()
+                return Response(form.data, status=status.HTTP_201_CREATED)
+        return Response(request.data, status=status.HTTP_403_FORBIDDEN)
+
 
 class RegistrationAPIView(APIView):
     """
@@ -109,6 +123,20 @@ class LoginAPIView(APIView):
         response = Response(serializer.data, status=status.HTTP_200_OK)
 
         return response
+
+
+class LogoutView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        try:
+            refresh_token = request.data['refresh_token']
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class LessonListView(viewsets.ModelViewSet):
