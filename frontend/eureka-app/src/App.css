@@ -51,6 +51,10 @@ label {
   width: 18rem;
 }
 
+.card-img-top {
+  object-fit: cover;
+}
+
 .center {
   margin: 0 auto 40px;
   display: flex;
