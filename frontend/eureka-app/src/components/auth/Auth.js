@@ -57,7 +57,7 @@ export default function (props) {
             localStorage.setItem('access_token', response.data['access']);
             localStorage.setItem('refresh_token', response.data['refresh']);
             axios.defaults.headers.common['Authorization'] =
-                `Bearer ${response.data['access']}`;
+                `Token ${response.data['access']}`;
             window.location.href = '/'
           })
           .catch(err => {console.log(err)})
@@ -70,7 +70,7 @@ export default function (props) {
          {
          headers: {
            'Content-Type': 'application/json;charset=utf-8',
-           'Authorization': `Bearer ${access}`,},
+           'Authorization': `Token ${access}`,},
          }
      )
        .catch(error => {
@@ -142,7 +142,7 @@ export default function (props) {
           setRefresh(r.data['refresh'])
           setError(null)
           axios.defaults.headers.common['Authorization'] =
-                `Bearer ${r.data['access']}`;
+                `Token ${r.data['access']}`;
           console.log("success")
           window.location.href = '/'
         })

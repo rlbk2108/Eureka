@@ -35,14 +35,15 @@
   font-weight: 800;
 }
 
-input.form-control, input.form-control:focus, textarea {
+input.form-control, input.form-control:focus, textarea, textarea.form-control, textarea.form-control:focus {
   background-color : #0d1117;
   border-color: #292f36;
   color: #e6edf3;
 }
 
+
 label {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   color: #e6edf3;
 }
@@ -75,4 +76,17 @@ label {
 
 .carousel-item.next {
   transform: translateX(100%);
+}
+
+.my-modal .modal-content {
+  background-color: #212529;
+  border-color: #454b52;
+  --body-quiet-color: #454b52;
+  --bs-modal-header-border-color: #454b52;
+  --bs-modal-footer-border-color: #454b52;
+  --bs-modal-border-width: 0px;
+}
+
+.modal {
+
 }

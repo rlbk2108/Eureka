@@ -10,35 +10,57 @@ import Navbar from "react-bootstrap/Navbar";
 
 export const CustomNavbar = () => {
     const [isAuth, setIsAuth] = useState(false);
-    let access = localStorage.getItem('access_token');
+    const [access_token, setAccessToken] = useState(null);
+    let localStorageToken = localStorage.getItem('access_token');
+    useEffect(() => {
+        setAccessToken(localStorageToken)},
+            [localStorageToken]
+    )
+
     const [user, setUser] = useState(null);
 
 
     useEffect(() => {
-     if (access !== null) {
+     if (access_token !== null) {
         setIsAuth(true);
       }
-     }, [isAuth]);
+     }, [isAuth, access_token]);
 
     useEffect(() => {
-      const token = jwt_decode(localStorage.getItem('access_token'));
-      axios
-        .get(`http://localhost:8000/api/users/${token['user_id']}/`)
-        .then(r => {
-            setUser(r.data['username'])
-        })
-        .catch(error => {
-        console.log("error", error);
-        });
+        let token;
+        if (access_token !== null) {
+            token = jwt_decode(localStorage.getItem('access_token'));
+            axios
+                .get(`http://localhost:8000/api/users/${token['user_id']}/`)
+                .then(r => {
+                    setUser(r.data['username'])
+                })
+                .catch(error => {
+                console.log("error", error);
+                });
+            }
       })
 
     const logoutHandler = e => {
       e.preventDefault()
         axios
-            .post('http://localhost:8000/api/logout/')
+            .post('http://localhost:8000/api/logout/',
+                {
+                    access_token: localStorage.getItem('access_token'),
+                    refresh_token: localStorage.getItem('refresh_token')
+                },
+                {
+                    headers: {
+                    'Authorization': `Token ${localStorage.getItem('access_token')}`}})
             .then(response=> {
                 console.log("response", response);
             })
+            .catch(error => {
+                console.log("Logout error", error)
+            })
+        localStorage.setItem('access_token', null);
+        localStorage.setItem('refresh_token', null)
+        setIsAuth(false);
     }
 
     return (
@@ -76,7 +98,7 @@ export const CustomNavbar = () => {
             </form>
           <Nav>
               {isAuth ? <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                <a className="btn btn-dark">Hi, {user}</a>
+                <a className="btn btn-dark" href="#">Hi, {user}</a>
                 <Button variant="outline-light" onClick={logoutHandler}>Log Out</Button>
               </div>
                   :
