@@ -28,7 +28,7 @@ export const CustomNavbar = () => {
 
     useEffect(() => {
         let token;
-        if (access_token !== null) {
+        if (access_token) {
             token = jwt_decode(localStorage.getItem('access_token'));
             axios
                 .get(`http://localhost:8000/api/users/${token['user_id']}/`)
@@ -60,6 +60,8 @@ export const CustomNavbar = () => {
             })
         localStorage.setItem('access_token', null);
         localStorage.setItem('refresh_token', null)
+        localStorage.clear()
+        setAccessToken(null)
         setIsAuth(false);
     }
 
